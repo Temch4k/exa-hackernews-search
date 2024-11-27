@@ -26,6 +26,10 @@ client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 app = Flask(__name__)
 CORS(app)  
 
+@app.route('/')
+def index():
+    return jsonify({"Choo Choo": "Welcome to your Flask app 🚅"})
+
 @app.route("/query_exa_search", methods=['POST'])
 def query_exa_search():
     data = request.get_json()
