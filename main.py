@@ -66,7 +66,7 @@ def query_exa_content():
 def chat_exa():
     def trim_content(content, max_length=8000):
         if len(content.split()) > max_length:
-            return ' '.join(content.split()[:max_length]) + " ... (content trimmed for brevity)"
+            return ' '.join(content.split()[:max_length]) + " ... (content shortened)"
         return content
 
     data = request.get_json()
