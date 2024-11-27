@@ -4,10 +4,10 @@ import requests
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
+from waitress import serve
 
 load_dotenv()
 
-os.environ["EXA_API_URL"] = "https://api.exa.ai"
 EXA_API_URL = os.getenv("EXA_API_URL")
 EXA_API_KEY = os.getenv("EXA_API_KEY")
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
@@ -89,4 +89,5 @@ def chat_exa():
     return jsonify({"bot_response": assistant_response})
 
 if __name__ == '__main__':
-    app.run(port=8000)
+    print("Starting production server on http://localhost:8000")
+    serve(app, host='0.0.0.0', port=8000)
