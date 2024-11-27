@@ -74,6 +74,12 @@ def query_exa_content():
 
 @app.route("/query_exa_chat", methods=['POST'])
 def chat_exa():
+
+    def trim_content(content, max_length=8000):
+        if len(content.split()) > max_length:
+            return ' '.join(content.split()[:max_length]) + " ... (content trimmed for brevity)"
+        return content
+
     data = request.get_json()
     user_input = data.get('user_input')
     page_content = data.get('page_content')
