@@ -4,7 +4,7 @@ import requests
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
-from waitress import serve
+# from waitress import serve
 import logging
 
 load_dotenv()
@@ -110,4 +110,4 @@ def chat_exa():
 #     serve(app, host='0.0.0.0', port=port)
 
 if __name__ == '__main__':
-  app.run(port=5000)
+  app.run(host = '0.0.0.0', port=PORT)
