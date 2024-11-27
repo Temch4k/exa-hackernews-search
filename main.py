@@ -5,11 +5,22 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 from waitress import serve
+import logging
 
 load_dotenv()
 
+# Set up logging based on DEBUG_MODE env var
+DEBUG_MODE = os.getenv('DEBUG_MODE', 'False').lower() == 'true'
+logging.basicConfig(
+    level=logging.DEBUG if DEBUG_MODE else logging.WARNING,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 EXA_API_URL = os.getenv("EXA_API_URL")
 EXA_API_KEY = os.getenv("EXA_API_KEY")
+HOST = os.getenv("HOST")
+PORT = os.getenv("PORT")
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
 app = Flask(__name__)
@@ -30,9 +41,10 @@ def query_exa_search():
     try:
         response = requests.post(EXA_API_URL+"/search", headers=headers, json=payload)
         response.raise_for_status()
+        logger.debug(f"Search API response status: {response.status_code}")
         return jsonify({"results": response.json()})
     except requests.exceptions.RequestException as e:
-        print(f"Error details: {str(e)}")
+        logger.error(f"Error details: {str(e)}")
         return jsonify({
             "error": f"Error communicating with EXA API: {str(e)}"
         }), 500
@@ -47,11 +59,11 @@ def query_exa_content():
 
     try:
         response = requests.post(EXA_API_URL+"/contents", headers=headers, json=payload)
-        print(f"Response status: {response.status_code}")
+        logger.debug(f"Content API response status: {response.status_code}")
         response.raise_for_status()
         return jsonify({"content": response.json()})
     except requests.exceptions.RequestException as e:
-        print(f"Error details: {str(e)}")
+        logger.error(f"Error details: {str(e)}")
         return jsonify({
             "error": f"Error communicating with EXA Content API: {str(e)}"
         }), 500
@@ -62,7 +74,7 @@ def chat_exa():
     user_input = data.get('user_input')
     page_content = data.get('page_content')
     
-    print(f"Received chat query for: {user_input}")
+    logger.debug(f"Received chat query for: {user_input}")
     system_prompt = f"""You are a helpful assistant that answers questions based on 
         Hacker News webpages that will be provided to you in the Context field. 
         Use the provided context to answer questions accurately 
@@ -84,10 +96,15 @@ def chat_exa():
     )
 
     assistant_response = response.choices[0].message.content
-    print(f"Assistant response: {assistant_response}")
+    logger.debug(f"Assistant response: {assistant_response}")
 
     return jsonify({"bot_response": assistant_response})
 
 if __name__ == '__main__':
-    print("Starting production server on http://localhost:8000")
-    serve(app, host='0.0.0.0', port=8000)
+
+    port = int(os.getenv('PORT', '8000'))
+    logger.info(f"Starting production server on [::]:{port}")
+    serve(app, 
+          host='::',
+          port=port)
+    
